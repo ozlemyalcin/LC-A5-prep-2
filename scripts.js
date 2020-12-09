@@ -36,7 +36,8 @@ function fetchCategories() {
     fetch("https://opentdb.com/api_category.php").then( function(response) {
         response.json().then( function(json) {
             categories = json.trivia_categories;
-            console.log("Categories loaded.");
+            console.log("Categories loaded." );
+            console.log(categories);
             console.log("Categories displayed in drop-down menu on page.");
             init(); // This MUST go here so that nothing else on the page happens until the categories drop-down has the data it needs to populate the options!
         });
@@ -54,16 +55,66 @@ window.addEventListener("load", function() {
 function init() {
 
     // TODO: Establish variable to hold questions after they are returned from fetch request
-    
+    let questions = [];
 
     // TODO: Establish variables for DOM objects representing HTML elements
-    
+    let category = document.getElementById("category");
+    let numQuestions = document.getElementById("num-questions");
+    let type = document.getElementById("type");
+    let difficulty = document.getElementById("difficulty");
+    let form =document.getElementById("form");
+
 
     // TODO: Write a function to populate the drop-down list of categories
-    
+    function listCategories(){
+        //For loop through categories array
+            //Append to category DOM object ->
+                //option elements with value:id, text: name
+        for (let i = 0; i< categories.length; i++){
+            category.innerHTML += `
+                <option value = "${categories[i].id}">${categories[i].name}</option>
+            `;
+        }
+    }
+    listCategories();
 
     // TODO: Write a function to build the URL with query parameters based on form submitted
-    
+    function buildURL(){
+        let newURL = "https://opentdb.com/api.php?token=" + currentToken + "&amount=" + numQuestions.value;
+        if (category.value !== "any") {
+            newURL += "&category=" + category.value;
+        }
+        if (type.value !== "any") {
+            newURL += "&type=" + type.value;
+        }
+        if (difficulty.value !== "any") {
+            newURL += "&difficulty=" + difficulty.value;
+        }
+        return newURL;
+       
+        
+    }
+
+
+    function getQuestions(){
+        let url = buildURL(); 
+        console.log(url);
+        fetch(url).then( function(response) {
+        response.json().then( function(json) {
+            questions = json.results;
+            console.log("New questions received.");
+            console.log(questions);
+            console.log("New questions displayed on page.");
+        });
+    });
+
+    }
+
+    form.addEventListener("submit", function(event){
+        getQuestions();
+
+        event.preventDefault();
+    });
 
     // TODO: Write a function to fetch new questions from trivia database
     
