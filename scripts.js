@@ -63,6 +63,7 @@ function init() {
     let type = document.getElementById("type");
     let difficulty = document.getElementById("difficulty");
     let form =document.getElementById("form");
+    let questionArea =document.getElementById("question-area");
 
 
     // TODO: Write a function to populate the drop-down list of categories
@@ -103,14 +104,60 @@ function init() {
         response.json().then( function(json) {
             questions = json.results;
             console.log("New questions received.");
-            console.log(questions);
+            displayQuestions();
+            console.log(questions);// eventually, replace console.log with displayQuestions()
             console.log("New questions displayed on page.");
         });
     });
 
     }
+    function getAnswerOptions(qIndex){
+        let answers = [];
+        answers.push(questions[qIndex].correct_answer);
+        answers= answers.concat(questions[qIndex].incorrect_answers);
+        //we have unshuffled list of answers in `answer`
+        shuffle(answers);
+        //Walk through answers array and generate string value with 
+        //< input type = radio value= answer0> Answer</input><input type=radio value=answer1
+
+        let options="";
+        for(let i = 0; i< answers.length; i++){
+            options +=`
+                <input type="radio" id="q${qIndex}-${i}" class="answer" name="q${qIndex}" value="${answers[i]}" />
+                <label for="q${qIndex}-${i}" class="q-option"> ${answers[i]}</label>
+                
+            
+            `;
+                //q0-0, q0-1, q0-2
+                //name: q0, q1, q2
+        }
+        return options;      
+    }
+
+
+    function displayQuestions(){
+        let answers;
+        for (let i=0; i<questions.length; i++){
+            // Each iteration, display 1 question -- question[i] -- and its answers
+            answers = getAnswerOptions(i); // returns list of answers shuffled up
+            questionArea.innerHTML +=`
+                <div class="q-container">
+                    <p class="q-number">Question ${i+1}</p>
+                    <p class="q-question"> ${questions[i].question}</p>
+                    ${answers}
+                    <p class="q-info">${questions[i].category} &nbsp;&bull;&nbsp; ${questions[i].difficulty}</p>
+                </div>
+            `;
+        }
+
+    }
+
 
     form.addEventListener("submit", function(event){
+        if (numQuestions.value<1 || numQuestions.value > 50){
+            alert("HEY NO!");
+            event.preventDefault();
+        }
         getQuestions();
 
         event.preventDefault();
